@@ -1,25 +1,22 @@
 # Helm Chart Previewer
 
-A modern FastAPI-based viewer for Helm charts with interactive visualization capabilities.
+A CLI tool for visualizing Helm chart structure and dependencies with interactive HTML output.
 
 ## Features
 
-- **FastAPI Backend**: Modern, fast, and async API built with FastAPI
+- **CLI Interface**: Simple command-line tool with rich terminal output
 - **Interactive Visualizations**: Beautiful network diagrams showing resource relationships
-- **Multiple Input Methods**: Upload charts or analyze local directories
-- **Rich Web Interface**: Bootstrap-based responsive UI with drag-and-drop support
-- **Detailed Analytics**: Comprehensive chart analysis with resource statistics
-- **Export Options**: Generate HTML reports and download JSON data
-- **CLI Tool**: Command-line interface with rich terminal output
-- **Modern Python**: Built with Python 3.9+ using modern async/await patterns
+- **Comprehensive Analysis**: Detailed chart analysis with resource statistics and security assessment
+- **Architecture Scoring**: Automatic evaluation of Kubernetes architecture completeness
+- **HTML Reports**: Generate interactive HTML visualizations
+- **Key Component Detection**: Special focus on ServiceAccount, Deployment, Service, and Ingress resources
 
 ## Quick Start
 
 ### Prerequisites
 
 - Python 3.12 or higher
-- [uv](https://github.com/astral-sh/uv) package manager
-- Helm CLI (optional, for enhanced chart parsing)
+- [uv](https://github.com/astral-sh/uv) package manager (recommended)
 
 ### Installation
 
@@ -45,55 +42,72 @@ A modern FastAPI-based viewer for Helm charts with interactive visualization cap
 
 ### Usage
 
-#### Web Interface
-
-Start the web server:
-```bash
-# Using the CLI
-helm-previewer serve
-
-# Or directly with uvicorn
-uv run uvicorn helm_previewer.app:app --host 0.0.0.0 --port 8080 --reload
-```
-
-Visit `http://localhost:8080` in your browser.
-
-#### Command Line Interface
+#### Basic Usage
 
 ```bash
-# Analyze a local chart
+# Analyze a Helm chart directory and generate HTML visualization
 helm-previewer parse ./my-chart
 
-# Generate HTML visualization
-helm-previewer parse ./my-chart --output chart-report.html --format html
+# Specify output filename
+helm-previewer parse ./my-chart --output my-chart-report.html
 
-# Generate JSON data
-helm-previewer parse ./my-chart --output chart-data.json --format json
-
-# Create a test chart
-helm-previewer create-test-chart my-test-chart
-
-# List available local charts
-helm-previewer list-charts
-
-# Start web server with custom settings
-helm-previewer serve --host 0.0.0.0 --port 3000 --reload
+# Enable verbose output for detailed information
+helm-previewer parse ./my-chart --verbose
 ```
 
-## API Documentation
+#### Examples
 
-When the server is running, visit:
-- Swagger UI: `http://localhost:8080/api/docs`
-- ReDoc: `http://localhost:8080/api/redoc`
+```bash
+# Analyze a chart in the current directory
+helm-previewer parse .
 
-### Key API Endpoints
+# Analyze a chart with custom output name
+helm-previewer parse ./nginx-chart --output nginx-analysis.html
 
-- `POST /api/parse` - Parse a chart from local path
-- `POST /api/upload` - Upload and parse a chart archive
-- `POST /api/visualize/html` - Generate HTML visualization
-- `POST /api/visualize/network` - Get network data for custom visualizations
-- `GET /api/charts` - List available local charts
-- `GET /api/health` - Health check
+# Get detailed breakdown of resources and relationships
+helm-previewer parse ./my-microservice --verbose
+```
+
+## What You Get
+
+The tool generates an interactive HTML visualization that includes:
+
+### Architecture Analysis
+- **Architecture Completeness Score**: 0-100% based on key components presence
+- **Architecture Grading**: A+ (Complete) to D (Incomplete)
+- **Key Components Status**: Visual indicators for ServiceAccount, Deployment, Service, Ingress
+
+### Security Assessment
+- **Security Score**: Comprehensive RBAC, ServiceAccount, and Secrets analysis
+- **Recommendations**: Specific suggestions for improving security posture
+- **Best Practices**: Guidance on Kubernetes security patterns
+
+### Resource Analytics
+- **Interactive Network Diagram**: Visual representation of resource relationships
+- **Resource Categorization**: Organized by Workloads, Networking, Storage, Configuration, Security
+- **Relationship Mapping**: Advanced detection of dependencies and interactions
+
+### Interactive Features
+- **Strategic Layout**: Key components positioned prominently
+- **Color-coded Categories**: Different resource types use distinct colors and sizes
+- **Hover Tooltips**: Detailed information on mouse hover
+- **Responsive Design**: Works on desktop and mobile devices
+
+## Architecture Components Detected
+
+The tool specifically focuses on these key Kubernetes architecture components:
+
+### Core Components
+- **ServiceAccount**: Pod identity and authentication
+- **Deployment**: Application workload management
+- **Service**: Network abstraction and load balancing
+- **Ingress**: External access and routing
+
+### Supporting Resources
+- **ConfigMap/Secret**: Configuration and sensitive data management
+- **PersistentVolumeClaim**: Storage persistence
+- **Role/RoleBinding**: RBAC permissions
+- **HorizontalPodAutoscaler**: Auto-scaling configuration
 
 ## Development
 
@@ -146,13 +160,9 @@ uv run flake8 src/helm_previewer
 helm-previewer/
 ├── src/helm_previewer/           # Main package
 │   ├── __init__.py
-│   ├── app.py                    # FastAPI application
-│   ├── cli.py                    # CLI using Typer
+│   ├── cli.py                    # Click-based CLI
 │   ├── chart_parser.py           # Helm chart parsing logic
-│   ├── visualizer.py             # Visualization generation
-│   └── templates/                # Jinja2 templates
-│       ├── index.html
-│       └── error.html
+│   └── visualizer.py             # Visualization generation
 ├── tests/                        # Test files
 ├── pyproject.toml               # Project configuration
 ├── README.md
@@ -164,7 +174,7 @@ helm-previewer/
 The tool supports analyzing:
 
 - **Local Helm Charts**: Any directory with a `Chart.yaml` file
-- **Chart Archives**: `.zip`, `.tar.gz`, `.tgz` files containing charts
+- **Chart Archives**: After extraction to a directory
 - **Chart Repositories**: Charts from Helm repositories (via local path after `helm pull`)
 
 ### Supported Kubernetes Resources
@@ -180,19 +190,41 @@ The tool supports analyzing:
 
 ## Configuration
 
-### Environment Variables
+The tool works out-of-the-box with no configuration required. Simply point it at a Helm chart directory and it will:
 
-- `HELM_PREVIEWER_HOST`: Default host for web server (default: localhost)
-- `HELM_PREVIEWER_PORT`: Default port for web server (default: 8080)
-- `HELM_PREVIEWER_DEBUG`: Enable debug mode (default: false)
+1. Parse the Chart.yaml and values.yaml files
+2. Analyze all template files in the templates/ directory
+3. Detect relationships between resources
+4. Generate a comprehensive HTML visualization
 
-### Chart Parsing Options
+## Example Output
 
-The parser supports:
-- Template rendering with Helm CLI (when available)
-- Fallback YAML parsing for offline analysis
-- Dependency resolution from Chart.yaml and charts/ directory
-- Resource relationship analysis
+When you run `helm-previewer parse ./my-chart`, you'll see:
+
+```
+Chart: my-microservice
+Version: 1.0.0
+Description: A microservice application
+
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Metric              ┃ Value ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ Total Resources     │ 8     │
+│ Resource Types      │ 6     │
+│ Dependencies        │ 2     │
+│ ServiceAccounts     │ 1     │
+│ Deployments         │ 1     │
+│ Services            │ 1     │
+│ Ingresses           │ 1     │
+│ Architecture Score  │ 100/100 │
+│ Architecture Grade  │ A+ (Complete) │
+│ Security Score      │ 80/100 │
+└─────────────────────┴───────┘
+
+HTML visualization saved to: my-microservice-visualization.html
+```
+
+The generated HTML file will contain an interactive dashboard with network diagrams, security analysis, and detailed resource information.
 
 ## Contributing
 
@@ -204,40 +236,14 @@ The parser supports:
 6. Push to the branch: `git push origin feature-name`
 7. Submit a pull request
 
-## Migration from v0.1.x
-
-This version represents a complete rewrite using modern tools:
-
-### Key Changes
-
-- **Framework**: Migrated from Flask to FastAPI
-- **Package Management**: Now uses `uv` instead of pip/setuptools
-- **Project Structure**: Modern `pyproject.toml` configuration
-- **CLI**: New Typer-based CLI with rich terminal output
-- **Async Support**: Full async/await support throughout
-- **Type Hints**: Complete type annotations with Pydantic models
-- **Modern Dependencies**: Updated to latest versions of all dependencies
-
-### Breaking Changes
-
-- CLI commands have changed (see usage section)
-- API endpoints have new structure
-- Configuration format updated
-- Python 3.9+ required
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
-- Built with [FastAPI](https://fastapi.tiangolo.com/)
+- Built with [Click](https://click.palletsprojects.com/) for the CLI interface
 - Visualizations powered by [Plotly](https://plotly.com/python/)
-- CLI built with [Typer](https://typer.tiangolo.com/)
-- Package management with [uv](https://github.com/astral-sh/uv)
+- Rich terminal output with [Rich](https://rich.readthedocs.io/)
 - Charts parsed with [PyYAML](https://pyyaml.org/)
 - Network analysis with [NetworkX](https://networkx.org/)
-- `visualizer.py` - Chart visualization engine
-- `web_app.py` - Web interface
-- `templates/` - HTML templates for web interface
-- `static/` - CSS/JS for web interface
