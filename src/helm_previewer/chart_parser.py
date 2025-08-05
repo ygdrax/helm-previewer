@@ -8,11 +8,13 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class HelmResource(BaseModel):
     """Model for a Helm chart resource"""
+
+    model_config = ConfigDict(populate_by_name=True)
 
     name: str
     kind: str
@@ -23,12 +25,11 @@ class HelmResource(BaseModel):
     spec: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        populate_by_name = True
-
 
 class ChartMetadata(BaseModel):
     """Model for Helm chart metadata"""
+
+    model_config = ConfigDict(populate_by_name=True)
 
     name: str
     version: str
@@ -40,9 +41,6 @@ class ChartMetadata(BaseModel):
     sources: list[str] = Field(default_factory=list)
     dependencies: list[dict[str, Any]] = Field(default_factory=list)
     maintainers: list[dict[str, str]] = Field(default_factory=list)
-
-    class Config:
-        populate_by_name = True
 
 
 class ChartData(BaseModel):

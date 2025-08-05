@@ -85,6 +85,6 @@ def test_cli_import():
 
 def test_visualizer_import():
     """Test that we can import the visualizer module"""
-    from helm_previewer.visualizer import HelmChartVisualizer
+    from helm_previewer.visualizer import ChartVisualizer
 
-    assert HelmChartVisualizer is not None
+    assert ChartVisualizer is not None
